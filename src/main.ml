@@ -3,10 +3,9 @@ type cell = Empty
 	| Black of int
 	| Light
 
-
 type board = cell list list
 
-let rec print_board =
+let rec string_of_board =
 	let print_cell = function
 		| Empty -> "🌳"
 		| Lit -> "🪓"
@@ -24,12 +23,11 @@ let rec print_board =
 	in
 	function
 		| [] -> ""
-		| h :: t -> "|" ^ (print_row h) ^ "|\n" ^ (print_board t)
+		| h :: t -> "|" ^ (print_row h) ^ "|\n" ^ (string_of_board t)
 
-let _ = print_endline ""; print_endline @@ print_board [
+let demo_board = [
 	[ Empty;  Lit; Light; Black 3];
 	[ Black 1;  Light; Lit; Empty];
 	[ Empty; Lit; Black 2; Light];
 	[Empty; Lit; Empty; Empty]
 ]
-
