@@ -14,6 +14,9 @@ utop:
 test:
 	OCAMLRUNPARAM=b dune exec test/main.exe
 
+play:
+	OCAMLRUNPARAM=b dune exec src/main.exe
+
 zip:
 	rm -f project.zip
 	zip -r project.zip . -x@exclude.lst
