@@ -8,10 +8,15 @@ type board = cell list list
 
 let rec print_board =
 	let print_cell = function
-		| Empty -> " "
-		| Lit -> "🤮"
-		| Black n -> string_of_int n
-		| Light -> "🤢"
+		| Empty -> "🌳"
+		| Lit -> "🪓"
+		| Black n -> (match n with
+			| 1 -> "1️⃣ "
+			| 2 -> "2️⃣ "
+			| 3 -> "3️⃣ "
+			| 4 -> "4️⃣ "
+			| _ -> "#️⃣ ")
+		| Light -> "👨"
 	in
 	let rec print_row = function
 		| [] -> ""
@@ -22,7 +27,9 @@ let rec print_board =
 		| h :: t -> "|" ^ (print_row h) ^ "|\n" ^ (print_board t)
 
 let _ = print_endline ""; print_endline @@ print_board [
-	[ Empty;  Lit];
-	[ Black 1;  Light]
+	[ Empty;  Lit; Light; Black 3];
+	[ Black 1;  Light; Lit; Empty];
+	[ Empty; Lit; Black 2; Light];
+	[Empty; Lit; Empty; Empty]
 ]
 
