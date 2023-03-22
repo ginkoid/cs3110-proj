@@ -1,33 +1,26 @@
-type cell = Empty
-	| Lit
-	| Black of int
-	| Light
+type cell =
+  | Empty
+  | Lit
+  | Black of int
+  | Light
 
 type board = cell list list
 
-let rec string_of_board =
-	let print_cell = function
-		| Empty -> "🌳"
-		| Lit -> "🪓"
-		| Black n -> (match n with
-			| 1 -> "1️⃣ "
-			| 2 -> "2️⃣ "
-			| 3 -> "3️⃣ "
-			| 4 -> "4️⃣ "
-			| _ -> "#️⃣ ")
-		| Light -> "👨"
-	in
-	let rec print_row = function
-		| [] -> ""
-		| h :: t -> (print_cell h) ^ (print_row t)
-	in
-	function
-		| [] -> ""
-		| h :: t -> "|" ^ (print_row h) ^ "|\n" ^ (string_of_board t)
+let string_of_board board =
+  let print_cell = function
+    | Empty -> "   "
+    | Lit -> " \u{25A0} "
+    | Black n -> " " ^ string_of_int n ^ "\u{FE0F}\u{20E3}"
+    | Light -> " \u{1F7E2} "
+  in
+  let print_row row = "|" ^ (List.map print_cell row |> String.concat "") ^ "|"
+  in
+  List.map print_row board |> String.concat "\n"
 
-let demo_board = [
-	[ Empty;  Lit; Light; Black 3];
-	[ Black 1;  Light; Lit; Empty];
-	[ Empty; Lit; Black 2; Light];
-	[Empty; Lit; Empty; Empty]
-]
+let demo_board =
+  [
+    [ Empty; Lit; Light; Black 3 ];
+    [ Black 1; Light; Lit; Empty ];
+    [ Empty; Lit; Black 2; Light ];
+    [ Empty; Lit; Empty; Lit ];
+  ]
