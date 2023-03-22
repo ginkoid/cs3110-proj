@@ -1,4 +1,9 @@
 (executable
  (name main)
- (libraries Akari)
- (modes js))
+ (libraries Akari js_of_ocaml)
+ (modes js)
+ (preprocess (pps js_of_ocaml-ppx))
+ (js_of_ocaml
+  (flags --target-env browser --opt 3)
+ )
+)

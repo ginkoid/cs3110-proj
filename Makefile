@@ -1,18 +1,17 @@
-ESBUILD=./node_modules/.bin/esbuild --bundle \
-	--external:fs --external:constants --external:tty --external:child_process \
+ESBUILD=./node_modules/.bin/esbuild --bundle --minify \
 	--log-override:duplicate-case=debug _build/default/app/main.bc.js
 
 .PHONY: test check
 
 build:
-	dune build
+	dune build --profile release
 	cp -r public/ dist
-	$(ESBUILD) --minify --outfile=dist/app.js
+	$(ESBUILD) --outfile=dist/app.js
 
 start:
-	-dune build
+	-dune build --profile release
 	! ./node_modules/.bin/conc -n dune,esbuild \
-	"dune build --watch" \
+	"dune build --watch --profile release" \
 	"$(ESBUILD) --watch --servedir=public --outfile=public/app.js"
 
 utop:

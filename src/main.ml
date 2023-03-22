@@ -1,26 +1,43 @@
+open Js_of_ocaml
+module Html = Dom_html
+
 type cell =
   | Empty
-  | Lit
-  | Black of int
+  | Shined
+  | Filled of int
   | Light
 
 type board = cell list list
 
-let string_of_board board =
-  let print_cell = function
-    | Empty -> "   "
-    | Lit -> " \u{25A0} "
-    | Black n -> " " ^ string_of_int n ^ "\u{FE0F}\u{20E3}"
-    | Light -> " \u{1F7E2} "
+let js = Js.string
+let doc = Html.document
+
+let dom_of_board b =
+  let div className =
+    let div = Html.createDiv doc in
+    div##.className := js className;
+    div
   in
-  let print_row row = "|" ^ (List.map print_cell row |> String.concat "") ^ "|"
+  let els =
+    List.map
+      (function
+        | Empty -> div "empty"
+        | Shined -> div "shined"
+        | Filled n ->
+            let el = div "filled" in
+            el##.innerText := js (string_of_int n);
+            el
+        | Light -> div "light")
+      (List.flatten b)
   in
-  List.map print_row board |> String.concat "\n"
+  let grid = div "grid" in
+  List.iter (Dom.appendChild grid) els;
+  grid
 
 let demo_board =
   [
-    [ Empty; Lit; Light; Black 3 ];
-    [ Black 1; Light; Lit; Empty ];
-    [ Empty; Lit; Black 2; Light ];
-    [ Empty; Lit; Empty; Lit ];
+    [ Shined; Shined; Light; Filled 1 ];
+    [ Filled 3; Empty; Shined; Shined ];
+    [ Empty; Empty; Filled 2; Light ];
+    [ Empty; Empty; Empty; Shined ];
   ]

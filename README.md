@@ -10,7 +10,7 @@
 - [opam](https://opam.ocaml.org/)
 
 ```sh
-opam install js_of_ocaml-compiler
+opam install js_of_ocaml js_of_ocaml-ppx js_of_ocaml-lwt
 npm install
 make start
 ```
