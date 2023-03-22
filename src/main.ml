@@ -41,3 +41,6 @@ let demo_board =
     [ Empty; Empty; Filled 2; Light ];
     [ Empty; Empty; Empty; Shined ];
   ]
+
+
+
