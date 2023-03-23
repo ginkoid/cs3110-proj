@@ -6,13 +6,4 @@
 
 ## Run
 
-- [Node.js](https://nodejs.org/)
-- [opam](https://opam.ocaml.org/)
-
-```sh
-opam install js_of_ocaml js_of_ocaml-ppx js_of_ocaml-lwt
-npm install
-make start
-```
-
-Visit [localhost:8000](http://localhost:8000/).
+See [INSTALL.md](INSTALL.md) for instructions on how to install and run the game.
