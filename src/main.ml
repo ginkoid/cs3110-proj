@@ -32,33 +32,60 @@ let demo_board =
     [ Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty ];
   ]
 
-let render_shined board =
+let cell_shined board x y =
+  let rec check x' y' (dx, dy) =
+    if x' < 0 || y' < 0 || x' >= List.length board || y' >= List.length board
+    then false
+    else
+      match List.nth (List.nth board y') x' with
+      | Empty -> check (x' + dx) (y' + dy) (dx, dy)
+      | Light -> true
+      | _ -> false
+  in
+  let checkdir (dx, dy) = check (x + dx) (y + dy) (dx, dy) in
+  checkdir (1, 0) || checkdir (-1, 0) || checkdir (0, 1) || checkdir (0, -1)
+
+let shined board =
   List.mapi
     (fun y ->
-      List.mapi (fun x -> function
-        | Empty ->
-            let rec check x y (dx, dy) =
-              if
-                x < 0 || y < 0
-                || x >= List.length board
-                || y >= List.length board
-              then false
-              else
-                match List.nth (List.nth board y) x with
-                | Empty -> check (x + dx) (y + dy) (dx, dy)
-                | Light -> true
-                | _ -> false
-            in
-            let checkdir = check x y in
-            if
-              checkdir (1, 0)
-              || checkdir (-1, 0)
-              || checkdir (0, 1)
-              || checkdir (0, -1)
-            then Shined
-            else Empty
-        | a -> a))
+      List.mapi (fun x cell ->
+          match cell with
+          | Empty -> if cell_shined board x y then Shined else Empty
+          | a -> a))
     board
+
+let filled board =
+  List.fold_left
+    (fun acc (y, row) ->
+      acc
+      && List.fold_left
+           (fun acc (x, cell) ->
+             acc
+             &&
+             match cell with
+             | Empty -> cell_shined board x y
+             | Light -> Bool.not (cell_shined board x y)
+             | Filled n ->
+                 let check (dx, dy) =
+                   let x' = x + dx in
+                   let y' = y + dy in
+                   if
+                     x' < 0 || y' < 0
+                     || x' >= List.length board
+                     || y' >= List.length board
+                   then 0
+                   else
+                     match List.nth (List.nth board y') x' with
+                     | Light -> 1
+                     | _ -> 0
+                 in
+                 check (1, 0) + check (-1, 0) + check (0, 1) + check (0, -1)
+                 == n
+             | _ -> true)
+           true
+           (List.mapi (fun i a -> (i, a)) row))
+    true
+    (List.mapi (fun i a -> (i, a)) board)
 
 let div className =
   let div = Html.createDiv doc in
@@ -85,7 +112,7 @@ let dom_of_board cb board =
                   cb board x y;
                   Js._true);
             el))
-      (render_shined board)
+      (shined board)
   in
   let grid = div "grid" in
   let _ =
@@ -98,7 +125,7 @@ let dom_of_board cb board =
   List.iter (Dom.appendChild grid) (List.flatten els);
   grid
 
-let click_board board x y =
+let click board x y =
   List.mapi
     (fun y' ->
       List.mapi (fun x' cell ->
@@ -113,11 +140,13 @@ let click_board board x y =
 let game board =
   let root = div "game" in
   let rec update_board board x y =
-    let board' = click_board board x y in
-    let _ =
-      Js.Unsafe.meth_call root "replaceChildren"
-        [| Js.Unsafe.inject (dom_of_board update_board board') |]
+    let board' = click board x y in
+    let els = [| Js.Unsafe.inject (dom_of_board update_board board') |] in
+    let els =
+      if filled board' then Array.append [| Js.Unsafe.inject (div "done") |] els
+      else els
     in
+    let _ = Js.Unsafe.meth_call root "replaceChildren" els in
     ()
   in
   let _ = Dom.appendChild root (dom_of_board update_board board) in
