@@ -13,17 +13,16 @@ body {
 .grid {
   display: grid;
   background: #fff;
-  grid-template-columns: repeat(4, 1fr);
+  font-size: 2rem;
+  grid-template-columns: repeat(var(--size), 1fr);
   user-select: none;
-  cursor: pointer;
-  padding: 50px;
-  border-radius: 5px;
+  padding: 1em;
+  border-radius: 0.25rem;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0.0625rem 0.1875rem, rgba(0, 0, 0, 0.05) 0px 1.75rem 1.4375rem -0.4375rem, rgba(0, 0, 0, 0.04) 0px 0.75rem 0.75rem -0.4375rem
 }
 
 .grid > div {
   border: 0.5px solid #000;
-  font-size: 3rem;
   line-height: 1em;
   width: 1em;
   height: 1em;
@@ -47,4 +46,8 @@ body {
   height: inherit;
   border-radius: 50%;
   background: #027f60;
+}
+
+.empty, .light, .shined {
+  cursor: pointer;
 }
