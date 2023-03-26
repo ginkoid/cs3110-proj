@@ -1,7 +1,7 @@
 # Installation
 
 You'll need:
-- [Node.js](https://nodejs.org/)
+- [Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 - [opam](https://opam.ocaml.org/)
 
 
