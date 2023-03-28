@@ -6,4 +6,6 @@
 
 ## Run
 
-See [INSTALL.md](INSTALL.md) for instructions on how to install and run the game.
+Play at [akari.pages.dev](https://akari.pages.dev)
+
+See [INSTALL.md](INSTALL.md) to install and run the game locally.
