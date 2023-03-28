@@ -135,7 +135,7 @@ let click board x y =
 let game board =
   let root = div "game" in
   let grid = div "grid" in
-  let status = div "status" in
+  let status = div "playing" in
   Dom.appendChild root status;
   Dom.appendChild root grid;
   let _ =
@@ -164,7 +164,8 @@ let game board =
         ())
       (indices (flat (shined !board')))
       (flat shined_board'');
-    board' := board''
+    status##.className := js (if filled board'' then "done" else "playing");
+    board' := board'';
   in
   let shined_board = shined board in
   let els =

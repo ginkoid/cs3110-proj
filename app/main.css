@@ -55,10 +55,17 @@ body {
   cursor: pointer;
 }
 
-.done::after {
-  content: '\1f389 Done! \1f389';
+.done::after, .playing::after {
   text-align: center;
   display: block;
-  margin: 1em;
+  margin: 0.5em;
   font-size: 1.5rem;
+}
+
+.done::after {
+  content: 'Done!';
+}
+
+.playing::after {
+  content: 'Akari';
 }
