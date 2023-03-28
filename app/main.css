@@ -14,14 +14,14 @@ body {
 .grid {
   display: grid;
   background: #fff;
-  font-size: 2rem;
+  font-size: calc(min(60vw, 60vh, 300px) / var(--size));
   grid-template-columns: repeat(var(--size), 1fr);
   user-select: none;
   padding: 1em;
-  border-radius: 0.25rem;
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 0.0625rem 0.1875rem,
-    rgba(0, 0, 0, 0.05) 0px 1.75rem 1.4375rem -0.4375rem,
-    rgba(0, 0, 0, 0.04) 0px 0.75rem 0.75rem -0.4375rem;
+  border-radius: 0.2em;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0.0625em 0.1875em,
+    rgba(0, 0, 0, 0.05) 0px 1.75em 1.4375em -0.4375em,
+    rgba(0, 0, 0, 0.04) 0px 0.75em 0.75em -0.4375em;
 }
 
 .grid > div {
@@ -56,7 +56,7 @@ body {
 }
 
 .done::after {
-  content: '🎉 Done! 🎉';
+  content: '\1f389 Done! \1f389';
   text-align: center;
   display: block;
   margin: 1em;

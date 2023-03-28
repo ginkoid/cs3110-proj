@@ -1,43 +1,52 @@
 open Js_of_ocaml
 module Html = Dom_html
 
+type shined_cell =
+  | Empty
+  | Filled of int
+  | Light
+  | Shined
+
 type cell =
   | Empty
-  | Shined
   | Filled of int
   | Light
 
-type board = cell list list
+type board = cell array array
 
 let js = Js.string
 let doc = Html.document
 
 let demo_board =
-  [
-    [ Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty; Empty ];
-    [ Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty ];
-    [
+  [|
+    [|
+      Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty; Empty;
+    |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+    [|
       Empty; Empty; Filled 4; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty;
-    ];
-    [ Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty ];
-    [ Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty ];
-    [
+    |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+    [|
       Filled 1; Empty; Empty; Empty; Empty; Empty; Empty; Filled 3; Empty; Empty;
-    ];
-    [ Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty ];
-    [
+    |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+    [|
       Empty; Empty; Empty; Empty; Filled 2; Empty; Empty; Empty; Filled 1; Empty;
-    ];
-    [ Empty; Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty ];
-    [ Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty ];
-  ]
+    |];
+    [|
+      Empty; Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty;
+    |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+  |]
 
 let cell_shined board x y =
   let rec check x' y' (dx, dy) =
-    if x' < 0 || y' < 0 || x' >= List.length board || y' >= List.length board
+    if x' < 0 || y' < 0 || x' >= Array.length board || y' >= Array.length board
     then false
     else
-      match List.nth (List.nth board y') x' with
+      match board.(y').(x') with
       | Empty -> check (x' + dx) (y' + dy) (dx, dy)
       | Light -> true
       | _ -> false
@@ -46,19 +55,22 @@ let cell_shined board x y =
   checkdir (1, 0) || checkdir (-1, 0) || checkdir (0, 1) || checkdir (0, -1)
 
 let shined board =
-  List.mapi
+  Array.mapi
     (fun y ->
-      List.mapi (fun x cell ->
+      Array.mapi (fun x cell ->
           match cell with
           | Empty -> if cell_shined board x y then Shined else Empty
-          | a -> a))
+          | Light -> Light
+          | Filled n -> Filled n))
     board
 
+let indices a = Array.mapi (fun i a -> (i, a)) a
+
 let filled board =
-  List.fold_left
+  Array.fold_left
     (fun acc (y, row) ->
       acc
-      && List.fold_left
+      && Array.fold_left
            (fun acc (x, cell) ->
              acc
              &&
@@ -71,64 +83,47 @@ let filled board =
                    let y' = y + dy in
                    if
                      x' < 0 || y' < 0
-                     || x' >= List.length board
-                     || y' >= List.length board
+                     || x' >= Array.length board
+                     || y' >= Array.length board
                    then 0
                    else
-                     match List.nth (List.nth board y') x' with
+                     match board.(y').(x') with
                      | Light -> 1
                      | _ -> 0
                  in
                  check (1, 0) + check (-1, 0) + check (0, 1) + check (0, -1)
-                 == n
-             | _ -> true)
-           true
-           (List.mapi (fun i a -> (i, a)) row))
-    true
-    (List.mapi (fun i a -> (i, a)) board)
+                 == n)
+           true (indices row))
+    true (indices board)
 
 let div className =
   let div = Html.createDiv doc in
   div##.className := js className;
   div
 
-let dom_of_board cb board =
-  let els =
-    List.mapi
-      (fun y ->
-        List.mapi (fun x cell ->
-            let el =
-              match cell with
-              | Empty -> div "empty"
-              | Shined -> div "shined"
-              | Filled n ->
-                  let el = div "filled" in
-                  el##.innerText := js (string_of_int n);
-                  el
-              | Light -> div "light"
-            in
-            el##.onclick :=
-              Html.handler (fun _ ->
-                  cb board x y;
-                  Js._true);
-            el))
-      (shined board)
+let dom_of_cell cb board x y =
+  let el =
+    match board.(y).(x) with
+    | Shined -> div "shined"
+    | Empty -> div "empty"
+    | Filled n ->
+        let el = div "filled" in
+        el##.innerText := js (string_of_int n);
+        el
+    | Light -> div "light"
   in
-  let grid = div "grid" in
-  let _ =
-    Js.Unsafe.meth_call grid##.style "setProperty"
-      [|
-        Js.Unsafe.inject (js "--size");
-        Js.Unsafe.inject (js (string_of_int (List.length board)));
-      |]
-  in
-  List.iter (Dom.appendChild grid) (List.flatten els);
-  grid
+  el##.onclick :=
+    Html.handler (fun _ ->
+        cb x y;
+        Js._true);
+  el
+
+let flat a = Array.concat (Array.to_list a)
 
 let click board x y =
-  List.mapi
+  Array.mapi
     (fun y' ->
-      List.mapi (fun x' cell ->
+      Array.mapi (fun x' cell ->
           if x' = x && y' = y then
             match cell with
             | Empty -> Light
@@ -139,15 +134,44 @@ let click board x y =
 
 let game board =
   let root = div "game" in
-  let rec update_board board x y =
-    let board' = click board x y in
-    let els = [| Js.Unsafe.inject (dom_of_board update_board board') |] in
-    let els =
-      if filled board' then Array.append [| Js.Unsafe.inject (div "done") |] els
-      else els
-    in
-    let _ = Js.Unsafe.meth_call root "replaceChildren" els in
-    ()
+  let grid = div "grid" in
+  let status = div "status" in
+  Dom.appendChild root status;
+  Dom.appendChild root grid;
+  let _ =
+    Js.Unsafe.meth_call grid##.style "setProperty"
+      [|
+        Js.Unsafe.inject (js "--size");
+        Js.Unsafe.inject (js (string_of_int (Array.length board)));
+      |]
   in
-  let _ = Dom.appendChild root (dom_of_board update_board board) in
+  let board' = ref board in
+  let rec update_board x y =
+    let board'' = click !board' x y in
+    let shined_board'' = shined board'' in
+    Array.iter2
+      (fun (i, a) b ->
+        (if a != b then
+         let el =
+           Js.Opt.get (grid##.childNodes##item i) (fun () -> assert false)
+         in
+         let el' =
+           dom_of_cell update_board shined_board''
+             (i mod Array.length board)
+             (i / Array.length board)
+         in
+         Dom.replaceChild grid el' el);
+        ())
+      (indices (flat (shined !board')))
+      (flat shined_board'');
+    board' := board''
+  in
+  let shined_board = shined board in
+  let els =
+    Array.mapi
+      (fun y ->
+        Array.mapi (fun x cell -> dom_of_cell update_board shined_board x y))
+      board
+  in
+  Array.iter (Dom.appendChild grid) (flat els);
   root
