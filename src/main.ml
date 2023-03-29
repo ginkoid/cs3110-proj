@@ -76,7 +76,7 @@ let filled board =
              &&
              match cell with
              | Empty -> cell_shined board x y
-             | Light -> Bool.not (cell_shined board x y)
+             | Light -> not (cell_shined board x y)
              | Filled n ->
                  let check (dx, dy) =
                    let x' = x + dx in
@@ -132,6 +132,15 @@ let click board x y =
           else cell))
     board
 
+let compare (a: shined_cell) (b: shined_cell) = match b with
+  | Empty -> a == Empty
+  | Filled n -> (
+      match a with
+      | Filled n' -> n == n'
+      | _ -> false)
+  | Light -> a == Light
+  | Shined -> a == Shined
+
 let game board =
   let root = div "game" in
   let grid = div "grid" in
@@ -151,7 +160,7 @@ let game board =
     let shined_board'' = shined board'' in
     Array.iter2
       (fun (i, a) b ->
-        (if a != b then
+        (if not (compare a b) then
          let el =
            Js.Opt.get (grid##.childNodes##item i) (fun () -> assert false)
          in

@@ -14,17 +14,17 @@ body {
 .grid {
   display: grid;
   background: #fff;
-  font-size: calc(min(60vw, 60vh, 300px) / var(--size));
+  font-size: calc(min(60vw, 50vh, 300px) / var(--size));
   grid-template-columns: repeat(var(--size), 1fr);
   user-select: none;
   padding: 1em;
   border-radius: 0.2em;
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 0.0625em 0.1875em,
-    rgba(0, 0, 0, 0.05) 0px 1.75em 1.4375em -0.4375em,
-    rgba(0, 0, 0, 0.04) 0px 0.75em 0.75em -0.4375em;
+  box-shadow: rgba(0, 0, 0, 0.05) 0 0.0625em 0.1875em,
+    rgba(0, 0, 0, 0.05) 0 1.75em 1.4375em -0.4375em,
+    rgba(0, 0, 0, 0.04) 0 0.75em 0.75em -0.4375em;
 }
 
-.grid > div {
+.grid * {
   border: 0.5px solid #000;
   line-height: 1em;
   width: 1em;
@@ -63,7 +63,7 @@ body {
 }
 
 .done::after {
-  content: 'Done!';
+  content: '\1f389 Done! \1f389';
 }
 
 .playing::after {
