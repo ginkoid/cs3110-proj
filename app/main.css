@@ -1,0 +1,72 @@
+body, html {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Open Sans', 'Helvetica Neue', sans-serif;
+  display: grid;
+  place-content: center;
+  background-color: #eee;
+}
+
+.grid {
+  display: grid;
+  background: #fff;
+  font-size: calc(min(60vw, 50vh, 300px) / var(--size));
+  grid-template-columns: repeat(var(--size), 1fr);
+  user-select: none;
+  padding: 1em;
+  border-radius: 0.2em;
+  box-shadow: rgba(0, 0, 0, 0.05) 0 0.0625em 0.1875em,
+    rgba(0, 0, 0, 0.05) 0 1.75em 1.4375em -0.4375em,
+    rgba(0, 0, 0, 0.04) 0 0.75em 0.75em -0.4375em;
+}
+
+.grid * {
+  border: 0.5px solid #000;
+  font-size: 3rem;
+  line-height: 1em;
+  width: 1em;
+  height: 1em;
+  padding: 0.2em;
+  text-align: center;
+}
+
+.filled {
+  background: #000;
+  color: #fff;
+}
+
+.light, .shined {
+  background: #c0ff7f
+}
+
+.light::after {
+  display: block;
+  content: '';
+  width: inherit;
+  height: inherit;
+  border-radius: 50%;
+  background: #027f60;
+}
+
+.empty, .light, .shined {
+  cursor: pointer;
+}
+
+.done::after, .playing::after {
+  text-align: center;
+  display: block;
+  margin: 0.5em;
+  font-size: 1.5rem;
+}
+
+.done::after {
+  content: '\1f389 Done! \1f389';
+}
+
+.playing::after {
+  content: 'Akari';
+}
