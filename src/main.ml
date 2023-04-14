@@ -9,11 +9,40 @@ type cell =
 
 type board = cell array array
 
-let js = Js.string
-let doc = Html.document
+type colstr = {col: int; str: string}
 
-let empty_board a b : board =
-  Array.init a (fun _ -> Array.init b (fun _ -> Empty))
+let colstr_of_tuple = function
+  | (col, str) -> {col; str}
+
+type theme = {
+  background : colstr;
+  empty : colstr;
+  shined : colstr;
+  light : colstr;
+  block : int;
+  }
+  
+  let js = Js.string
+  let doc = Html.document
+  
+  let empty_board a b : board =
+    Array.init a (fun _ -> Array.init b (fun _ -> Empty))
+  
+  let demo_theme_light = {
+    background = colstr_of_tuple (0xeeeeee, " ");
+    empty = colstr_of_tuple (0xffffff, " ");
+    shined = colstr_of_tuple (0xc0ff7f, " ");
+    light = colstr_of_tuple (0x027f60, "🧔");
+    block = 0
+  }
+
+let demo_theme_dark = {
+  background = colstr_of_tuple (0x111111, " ");
+  empty = colstr_of_tuple (0x222222, " ");
+  shined = colstr_of_tuple (0x027f60, " ");
+  light = colstr_of_tuple (0xc0ff7f, " ");
+  block = 0xeeeeee;
+}
 
 let demo_board =
   [|
@@ -93,21 +122,26 @@ let filled board =
            true (indices row))
     true (indices board)
 
-let div className =
+let div ?(innertext = "") className =
   let div = Html.createDiv doc in
   div##.className := js className;
+  div##.innerText := js innertext;
   div
 
-let dom_of_cell cb board x y =
+let dom_of_cell cb board theme x y =
   let el =
     match board.(y).(x) with
-    | Shined -> div "shined"
-    | Empty -> div "empty"
+    | Shined -> div "shined" ~innertext:theme.shined.str
+    | Empty -> div "empty" ~innertext:theme.empty.str
     | Filled n ->
         let el = div "filled" in
         el##.innerText := js (string_of_int n);
         el
-    | Light -> div "light"
+    | Light -> let elt = div "light"
+    in let eltinner = div "inner" ~innertext:theme.light.str
+    in
+    elt##.innerHTML := eltinner##.outerHTML;
+    elt 
   in
   el##.onclick :=
     Html.handler (fun _ ->
@@ -139,18 +173,34 @@ let compare (a : cell) (b : cell) =
   | Light -> a == Light
   | Shined -> a == Shined
 
-let dom_of_board board =
+let hex_of_int n =
+  Printf.sprintf "#%06x" n
+
+let dom_of_board board theme =
   let root = div "game" in
   let grid = div "grid" in
   let status = div "playing" in
+  let set_theme_col name colstr = 
+    ignore @@ Js.Unsafe.meth_call grid##.style "setProperty"
+         [|
+           Js.Unsafe.inject (js ("--theme_" ^ name));
+           Js.Unsafe.inject (js (hex_of_int colstr.col));
+         |];
+  in
   Dom.appendChild root status;
   Dom.appendChild root grid;
   let _ =
-    Js.Unsafe.meth_call grid##.style "setProperty"
-      [|
-        Js.Unsafe.inject (js "--size");
-        Js.Unsafe.inject (js (string_of_int (Array.length board)));
-      |]
+    ignore
+    @@ Js.Unsafe.meth_call grid##.style "setProperty"
+         [|
+           Js.Unsafe.inject (js "--size");
+           Js.Unsafe.inject (js (string_of_int (Array.length board)));
+         |];
+         set_theme_col "background" theme.background;
+         set_theme_col "empty" theme.empty;
+         set_theme_col "shined" theme.shined;
+         set_theme_col "light" theme.light;
+         set_theme_col "block" @@ colstr_of_tuple (theme.block, "");
   in
   let board' = ref board in
   let rec update_board x y =
@@ -163,7 +213,7 @@ let dom_of_board board =
            Js.Opt.get (grid##.childNodes##item i) (fun () -> assert false)
          in
          let el' =
-           dom_of_cell update_board shined_board''
+           dom_of_cell update_board shined_board'' theme
              (i mod Array.length board)
              (i / Array.length board)
          in
@@ -178,7 +228,7 @@ let dom_of_board board =
   let els =
     Array.mapi
       (fun y ->
-        Array.mapi (fun x cell -> dom_of_cell update_board shined_board x y))
+        Array.mapi (fun x cell -> dom_of_cell update_board shined_board theme x y))
       board
   in
   Array.iter (Dom.appendChild grid) (flat els);

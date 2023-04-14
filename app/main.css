@@ -8,12 +8,12 @@ body {
     Roboto, 'Open Sans', 'Helvetica Neue', sans-serif;
   display: grid;
   place-content: center;
-  background-color: #eee;
+  background-color: var(--theme_background);
 }
 
 .grid {
   display: grid;
-  background: #fff;
+  background: var(--theme_empty);
   font-size: calc(min(60vw, 50vh, 300px) / var(--size));
   grid-template-columns: repeat(var(--size), 1fr);
   user-select: none;
@@ -25,7 +25,7 @@ body {
 }
 
 .grid * {
-  border: 0.5px solid #000;
+  border: 0.5px solid var(--theme_block);
   font-size: 3rem;
   line-height: 1em;
   width: 1em;
@@ -35,21 +35,22 @@ body {
 }
 
 .filled {
-  background: #000;
-  color: #fff;
+  background: var(--theme_block);
+  color: var(--theme_empty);
 }
 
 .light, .shined {
-  background: #c0ff7f
+  background: var(--theme_shined)
 }
 
-.light::after {
+.light > .inner {
+  padding:0px;
   display: block;
   content: '';
   width: inherit;
   height: inherit;
   border-radius: 50%;
-  background: #027f60;
+  background: var(--theme_light);
 }
 
 .empty, .light, .shined {
