@@ -1,21 +1,19 @@
 open Js_of_ocaml
 module Html = Dom_html
 
-type shined_cell =
+type cell =
   | Empty
   | Filled of int
   | Light
   | Shined
 
-type cell =
-  | Empty
-  | Filled of int
-  | Light
-
 type board = cell array array
 
 let js = Js.string
 let doc = Html.document
+
+let empty_board a b : board =
+  Array.init a (fun _ -> Array.init b (fun _ -> Empty))
 
 let demo_board =
   [|
@@ -41,7 +39,6 @@ let demo_board =
     [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
   |]
 
-
 let cell_shined board x y =
   let rec check x' y' (dx, dy) =
     if x' < 0 || y' < 0 || x' >= Array.length board || y' >= Array.length board
@@ -55,16 +52,14 @@ let cell_shined board x y =
   let checkdir (dx, dy) = check (x + dx) (y + dy) (dx, dy) in
   checkdir (1, 0) || checkdir (-1, 0) || checkdir (0, 1) || checkdir (0, -1)
 
-let shined board =
-  Array.mapi
->>>>>>> 8ee512e0d2f075e1060646f213e1ebf580816d77
-    (fun y ->
-      Array.mapi (fun x cell ->
-          match cell with
-          | Empty -> if cell_shined board x y then Shined else Empty
-          | Light -> Light
-          | Filled n -> Filled n))
-    board
+let shined (board : board) =
+  board
+  |> Array.mapi (fun y ->
+         Array.mapi (fun x cell ->
+             match cell with
+             | Shined | Empty -> if cell_shined board x y then Shined else Empty
+             | Light -> Light
+             | Filled n -> Filled n))
 
 let indices a = Array.mapi (fun i a -> (i, a)) a
 
@@ -77,7 +72,7 @@ let filled board =
              acc
              &&
              match cell with
-             | Empty -> cell_shined board x y
+             | Shined | Empty -> cell_shined board x y
              | Light -> not (cell_shined board x y)
              | Filled n ->
                  let check (dx, dy) =
@@ -134,7 +129,8 @@ let click board x y =
           else cell))
     board
 
-let compare (a: shined_cell) (b: shined_cell) = match b with
+let compare (a : cell) (b : cell) =
+  match b with
   | Empty -> a == Empty
   | Filled n -> (
       match a with
@@ -143,7 +139,7 @@ let compare (a: shined_cell) (b: shined_cell) = match b with
   | Light -> a == Light
   | Shined -> a == Shined
 
-let game board =
+let dom_of_board board =
   let root = div "game" in
   let grid = div "grid" in
   let status = div "playing" in
@@ -176,7 +172,7 @@ let game board =
       (indices (flat (shined !board')))
       (flat shined_board'');
     status##.className := js (if filled board'' then "done" else "playing");
-    board' := board'';
+    board' := board''
   in
   let shined_board = shined board in
   let els =
