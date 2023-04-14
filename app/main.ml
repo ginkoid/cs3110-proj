@@ -6,4 +6,4 @@ let js = Js.string
 let doc = Html.document
 let root = Js.Opt.get (doc##getElementById (js "root")) (fun () -> assert false)
 
-let _ = Dom.appendChild root (game demo_board)
+let _ = Dom.appendChild root (game theme_light demo_board)

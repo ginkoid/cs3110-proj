@@ -17,6 +17,34 @@ type board = cell array array
 let js = Js.string
 let doc = Html.document
 
+type style = { color : int }
+
+type theme = {
+  background : style;
+  empty : style;
+  shined : style;
+  light : style;
+  block : style;
+}
+
+let theme_light =
+  {
+    background = { color = 0xeeeeee };
+    empty = { color = 0xffffff };
+    shined = { color = 0xc0ff7f };
+    light = { color = 0x027f60 };
+    block = { color = 0x000000 };
+  }
+
+let theme_dark =
+  {
+    background = { color = 0x111111 };
+    empty = { color = 0x222222 };
+    shined = { color = 0x027f60 };
+    light = { color = 0xc0ff7f };
+    block = { color = 0xeeeeee };
+  }
+
 let demo_board =
   [|
     [|
@@ -132,7 +160,8 @@ let click board x y =
           else cell))
     board
 
-let compare (a: shined_cell) (b: shined_cell) = match b with
+let compare (a : shined_cell) (b : shined_cell) =
+  match b with
   | Empty -> a == Empty
   | Filled n -> (
       match a with
@@ -141,19 +170,25 @@ let compare (a: shined_cell) (b: shined_cell) = match b with
   | Light -> a == Light
   | Shined -> a == Shined
 
-let game board =
+let hex_of_int n = Printf.sprintf "#%06x" n
+
+let game theme board =
   let root = div "game" in
   let grid = div "grid" in
   let status = div "playing" in
   Dom.appendChild root status;
   Dom.appendChild root grid;
-  let _ =
-    Js.Unsafe.meth_call grid##.style "setProperty"
-      [|
-        Js.Unsafe.inject (js "--size");
-        Js.Unsafe.inject (js (string_of_int (Array.length board)));
-      |]
+  let set_css name value =
+    ignore @@ Js.Unsafe.meth_call grid##.style "setProperty"
+      [| Js.Unsafe.inject (js ("--" ^ name)); Js.Unsafe.inject (js value) |]
   in
+  let set_theme name value = set_css ("color-" ^ name) (hex_of_int value.color) in
+  set_theme "background" theme.background;
+  set_theme "empty" theme.empty;
+  set_theme "shined" theme.shined;
+  set_theme "light" theme.light;
+  set_theme "block" theme.block;
+  set_css "size" (string_of_int (Array.length board));
   let board' = ref board in
   let rec update_board x y =
     let board'' = click !board' x y in
@@ -174,7 +209,7 @@ let game board =
       (indices (flat (shined !board')))
       (flat shined_board'');
     status##.className := js (if filled board'' then "done" else "playing");
-    board' := board'';
+    board' := board''
   in
   let shined_board = shined board in
   let els =
