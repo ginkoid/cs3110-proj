@@ -160,16 +160,6 @@ let click board x y =
           else cell))
     board
 
-let compare (a : shined_cell) (b : shined_cell) =
-  match b with
-  | Empty -> a == Empty
-  | Filled n -> (
-      match a with
-      | Filled n' -> n == n'
-      | _ -> false)
-  | Light -> a == Light
-  | Shined -> a == Shined
-
 let hex_of_int n = Printf.sprintf "#%06x" n
 
 let game theme board =
@@ -195,7 +185,7 @@ let game theme board =
     let shined_board'' = shined board'' in
     Array.iter2
       (fun (i, a) b ->
-        (if not (compare a b) then
+        (if a <> b then
          let el =
            Js.Opt.get (grid##.childNodes##item i) (fun () -> assert false)
          in
