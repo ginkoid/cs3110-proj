@@ -2,7 +2,7 @@ ESBUILD=./node_modules/.bin/esbuild --bundle --minify \
 	--log-override:duplicate-case=debug --entry-names=assets/[name] \
 	_build/default/app/main.bc.js ./app/main.css
 
-.PHONY: test check
+.PHONY: build start utop test
 
 build:
 	dune build --profile release

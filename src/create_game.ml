@@ -1,5 +1,3 @@
-(* open Lacaml.D open Lacaml.Io *)
-
 type difficulty =
   | Easy
   | Normal
@@ -12,8 +10,3 @@ let board difficulty = function
 
 let pick_rand_tiles board = failwith "unimplemented"
 let gen_black_sq board = failwith "unimplemented"
-(*board |> pick_rand_tiles |> enumerate_rand_tiles *)
-
-(* let gen_board board difficulty = function | Easy -> board |> gen_num_blocks
-   |> () | Normal -> board |> gen_num_blocks |> () | Hard -> board |>
-   gen_num_blocks |> () *)
