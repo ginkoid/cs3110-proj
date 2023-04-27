@@ -1,5 +1,4 @@
-open Js_of_ocaml
-module Html = Dom_html
+open Util
 
 type cell =
   | Empty
@@ -9,39 +8,8 @@ type cell =
 
 type board = cell array array
 
-let js = Js.string
-let doc = Html.document
-
 let empty_board a b : board =
   Array.init a (fun _ -> Array.init b (fun _ -> Empty))
-
-type style = { color : int }
-
-type theme = {
-  background : style;
-  empty : style;
-  shined : style;
-  light : style;
-  block : style;
-}
-
-let theme_light =
-  {
-    background = { color = 0xeeeeee };
-    empty = { color = 0xffffff };
-    shined = { color = 0xc0ff7f };
-    light = { color = 0x027f60 };
-    block = { color = 0x000000 };
-  }
-
-let theme_dark =
-  {
-    background = { color = 0x111111 };
-    empty = { color = 0x222222 };
-    shined = { color = 0x027f60 };
-    light = { color = 0xc0ff7f };
-    block = { color = 0xeeeeee };
-  }
 
 let demo_board =
   [|
@@ -121,13 +89,7 @@ let filled board =
            true (indices row))
     true (indices board)
 
-let div ?(innertext = "") className =
-  let div = Html.createDiv doc in
-  div##.className := js className;
-  div##.innerText := js innertext;
-  div
-
-let dom_of_cell cb board theme x y =
+let dom_of_cell cb board x y =
   let el =
     match board.(y).(x) with
     | Shined -> div "shined"
@@ -138,8 +100,7 @@ let dom_of_cell cb board theme x y =
         el
     | Light ->
         let elt = div "light" in
-        let eltinner = div "inner" in
-        elt##.innerHTML := eltinner##.outerHTML;
+        Dom.appendChild elt @@ div "inner";
         elt
   in
   el##.onclick :=
@@ -162,28 +123,13 @@ let click board x y =
           else cell))
     board
 
-let hex_of_int n = Printf.sprintf "#%06x" n
-
-let game theme board =
+let game board =
   let root = div "game" in
   let grid = div "grid" in
   let status = div "playing" in
   Dom.appendChild root status;
   Dom.appendChild root grid;
-  let set_css name value =
-    ignore
-    @@ Js.Unsafe.meth_call grid##.style "setProperty"
-         [| Js.Unsafe.inject (js ("--" ^ name)); Js.Unsafe.inject (js value) |]
-  in
-  let set_theme name value =
-    set_css ("color-" ^ name) (hex_of_int value.color)
-  in
-  set_theme "background" theme.background;
-  set_theme "empty" theme.empty;
-  set_theme "shined" theme.shined;
-  set_theme "light" theme.light;
-  set_theme "block" theme.block;
-  set_css "size" (string_of_int (Array.length board));
+  set_css grid "size" (string_of_int (Array.length board));
   let board' = ref board in
   let rec update_board x y =
     let board'' = click !board' x y in
@@ -195,7 +141,7 @@ let game theme board =
            Js.Opt.get (grid##.childNodes##item i) (fun () -> assert false)
          in
          let el' =
-           dom_of_cell update_board shined_board'' theme
+           dom_of_cell update_board shined_board''
              (i mod Array.length board)
              (i / Array.length board)
          in
@@ -211,7 +157,7 @@ let game theme board =
     Array.mapi
       (fun y ->
         Array.mapi (fun x cell ->
-            dom_of_cell update_board shined_board theme x y))
+            dom_of_cell update_board shined_board x y))
       board
   in
   Array.iter (Dom.appendChild grid) (flat els);
