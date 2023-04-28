@@ -17,3 +17,11 @@ let set_css root name value =
   ignore
   @@ Js.Unsafe.meth_call root##.style "setProperty"
        [| Js.Unsafe.inject (js ("--" ^ name)); Js.Unsafe.inject (js value) |]
+
+type cell =
+  | Empty
+  | Filled of int
+  | Light
+  | Shined
+
+type board = cell array array

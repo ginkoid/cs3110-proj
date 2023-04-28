@@ -1,40 +1,5 @@
 open Util
 
-type cell =
-  | Empty
-  | Filled of int
-  | Light
-  | Shined
-
-type board = cell array array
-
-let empty_board a b : board =
-  Array.init a (fun _ -> Array.init b (fun _ -> Empty))
-
-let demo_board =
-  [|
-    [|
-      Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty; Empty;
-    |];
-    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-    [|
-      Empty; Empty; Filled 4; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty;
-    |];
-    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-    [|
-      Filled 1; Empty; Empty; Empty; Empty; Empty; Empty; Filled 3; Empty; Empty;
-    |];
-    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-    [|
-      Empty; Empty; Empty; Empty; Filled 2; Empty; Empty; Empty; Filled 1; Empty;
-    |];
-    [|
-      Empty; Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty;
-    |];
-    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-  |]
-
 let cell_shined board x y =
   let rec check x' y' (dx, dy) =
     if x' < 0 || y' < 0 || x' >= Array.length board || y' >= Array.length board
@@ -94,10 +59,7 @@ let dom_of_cell cb board x y =
     match board.(y).(x) with
     | Shined -> div "shined"
     | Empty -> div "empty"
-    | Filled n ->
-        let el = div "filled" in
-        el##.innerText := js (string_of_int n);
-        el
+    | Filled n -> div "filled" ?innertext:(Some (string_of_int n))
     | Light ->
         let elt = div "light" in
         Dom.appendChild elt @@ div "inner";

@@ -37,7 +37,7 @@ let themes = [|
 |]
 
 
-let menu = 
+let menu =
   let root = div "menu" in
   let toolbar = div "toolbar" in
   let theme_id = ref 0 in
@@ -45,8 +45,8 @@ let menu =
   let set_theme_elt name value =
     set_css root ("color-" ^ name) (hex_of_int value.color)
   in
-  let set_theme id = 
-    let theme = themes.(id) in 
+  let set_theme id =
+    let theme = themes.(id) in
     theme_id := id;
     set_theme_elt "background" theme.background;
     set_theme_elt "empty" theme.empty;
@@ -63,5 +63,5 @@ let menu =
   set_theme 0;
   Dom.appendChild toolbar theme_updater;
   Dom.appendChild root toolbar;
-  Main.(Dom.appendChild root @@ game demo_board);
+  Main.(Dom.appendChild root @@ Select.select);
   root
