@@ -61,6 +61,9 @@ let menu =
       Js._true
     );
   set_theme 0;
+  let puzzle_creator = div "create-puzzle" in
+  puzzle_creator##.innerText := js "Create New Puzzle";
+  Dom.appendChild toolbar puzzle_creator;
   Dom.appendChild toolbar theme_updater;
   Dom.appendChild root toolbar;
   Main.(Dom.appendChild root @@ Select.select);

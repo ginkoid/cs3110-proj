@@ -28,17 +28,15 @@ body {
   align-items: stretch;
 }
 
-.set-theme {
-  margin-left: auto;
-  width: 10em;
-  padding: 0.1em;
-  padding-right: 1em;
-  flex: 0 2;
+.toolbar > * {
   color: var(--color-block);
   display: flex;
   align-items: center;
   cursor: pointer;
   user-select: none;
+  padding: 0.1em;
+  padding-right: 1em;
+  padding-left: 1em;
 }
 
 .opts {
@@ -58,6 +56,12 @@ body {
   box-shadow: rgba(0, 0, 0, 0.05) 0 0.0625em 0.1875em,
     rgba(0, 0, 0, 0.05) 0 1.75em 1.4375em -0.4375em,
     rgba(0, 0, 0, 0.04) 0 0.75em 0.75em -0.4375em;
+}
+
+.set-theme {
+  margin-left: auto;
+  width: 10em;
+  flex: 0 2;
 }
 
 .game {
