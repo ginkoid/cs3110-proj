@@ -1,1 +1,4 @@
-val select : unit -> Js_of_ocaml.Dom_html.element Js_of_ocaml.Js.t
+open Util
+val select : unit -> Html.element Js.t
+val set_current_game : board -> Html.element Js.t
+val current_game : unit -> board option

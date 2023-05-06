@@ -25,3 +25,7 @@ type cell =
   | Shined
 
 type board = cell array array
+
+let size board = Array.length board, Array.length board.(0)
+
+let enumerate a = Array.mapi (fun i a -> (i, a)) a

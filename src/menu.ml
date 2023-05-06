@@ -63,18 +63,31 @@ let menu =
   set_theme 0;
   let puzzle_creator = div "new-puzzle" in
   puzzle_creator##.innerText := js "New Puzzle";
-  Dom.appendChild toolbar puzzle_creator;
-  Dom.appendChild toolbar theme_updater;
-  Dom.appendChild root toolbar;
-  let new_game _ = 
-    let el = Js.Opt.get (
+  puzzle_creator##.onclick := Html.handler (fun _ -> 
+    let selector = Js.Opt.get (
       Html.document##querySelector (js ".select")
     ) (fun () -> assert false) in
-    Dom.removeChild root el;
-    Dom.appendChild root @@ Select.select ()
-  in
-  puzzle_creator##.onclick := Html.handler (fun _ -> 
-    new_game (); Js._true
+    Dom.replaceChild root (Select.select ()) selector;
+    Js._true
   );
+  let give_up = div "give-up" in
+  give_up##.innerText := js "Show Solution";
+  give_up##.onclick := Html.handler (fun _ ->
+    let selector = Js.Opt.get (
+      Html.document##querySelector (js ".select")
+    ) (fun () -> assert false) in
+    (match Select.current_game () with
+      | None -> ()
+      | Some board -> begin
+        match Solver.solve board with
+          | None -> failwith "No solution to puzzle"
+          | Some x -> Dom.replaceChild root (Select.set_current_game x) selector
+      end);
+    Js._true
+  );
+  Dom.appendChild toolbar puzzle_creator;
+  Dom.appendChild toolbar give_up;
+  Dom.appendChild toolbar theme_updater;
+  Dom.appendChild root toolbar;
   Dom.appendChild root @@ Select.select ();
   root

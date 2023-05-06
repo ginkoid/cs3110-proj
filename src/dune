@@ -1,6 +1,6 @@
 (library
  (name akari)
  (public_name Akari)
- (libraries js_of_ocaml)
+ (libraries js_of_ocaml zarith_stubs_js bitwuzla)
  (preprocess (pps js_of_ocaml-ppx))
 )

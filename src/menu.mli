@@ -1,1 +1,2 @@
-val menu : Js_of_ocaml.Dom_html.element Js_of_ocaml.Js.t
+open Util
+val menu : Html.element Js.t

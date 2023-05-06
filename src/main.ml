@@ -22,38 +22,6 @@ let shined (board : board) =
              | Light -> Light
              | Filled n -> Filled n))
 
-let indices a = Array.mapi (fun i a -> (i, a)) a
-
-let filled board =
-  Array.fold_left
-    (fun acc (y, row) ->
-      acc
-      && Array.fold_left
-           (fun acc (x, cell) ->
-             acc
-             &&
-             match cell with
-             | Shined | Empty -> cell_shined board x y
-             | Light -> not (cell_shined board x y)
-             | Filled n ->
-                 let check (dx, dy) =
-                   let x' = x + dx in
-                   let y' = y + dy in
-                   if
-                     x' < 0 || y' < 0
-                     || x' >= Array.length board
-                     || y' >= Array.length board
-                   then 0
-                   else
-                     match board.(y').(x') with
-                     | Light -> 1
-                     | _ -> 0
-                 in
-                 check (1, 0) + check (-1, 0) + check (0, 1) + check (0, -1)
-                 == n)
-           true (indices row))
-    true (indices board)
-
 let dom_of_cell cb board x y =
   let el =
     match board.(y).(x) with
@@ -109,9 +77,9 @@ let game board =
          in
          Dom.replaceChild grid el' el);
         ())
-      (indices (flat (shined !board')))
+      (enumerate (flat (shined !board')))
       (flat shined_board'');
-    status##.className := js (if filled board'' then "done" else "playing");
+    status##.className := js (if Solver.solved board'' then "done" else "playing");
     board' := board''
   in
   let shined_board = shined board in
