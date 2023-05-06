@@ -123,7 +123,7 @@ let puzzles =
     |];
   |]
 
-let select =
+let select _ =
   let root = div "select" in
   let opts = div "opts" in
   let selects = Array.mapi (fun i puzzle ->

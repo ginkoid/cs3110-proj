@@ -61,10 +61,20 @@ let menu =
       Js._true
     );
   set_theme 0;
-  let puzzle_creator = div "create-puzzle" in
-  puzzle_creator##.innerText := js "Create New Puzzle";
+  let puzzle_creator = div "new-puzzle" in
+  puzzle_creator##.innerText := js "New Puzzle";
   Dom.appendChild toolbar puzzle_creator;
   Dom.appendChild toolbar theme_updater;
   Dom.appendChild root toolbar;
-  Main.(Dom.appendChild root @@ Select.select);
+  let new_game _ = 
+    let el = Js.Opt.get (
+      Html.document##querySelector (js ".select")
+    ) (fun () -> assert false) in
+    Dom.removeChild root el;
+    Dom.appendChild root @@ Select.select ()
+  in
+  puzzle_creator##.onclick := Html.handler (fun _ -> 
+    new_game (); Js._true
+  );
+  Dom.appendChild root @@ Select.select ();
   root
