@@ -36,12 +36,15 @@ let solve board =
   (* Solver *)
   let solver = Sat.create () in
   let names = board |>
-    Array.map (
-      Array.map ( 
+    Array.mapi (fun x ->
+      Array.mapi (fun y -> 
         function
           | Light
           | Shined
-          | Empty -> Some (E.fresh ())
+          | Empty -> begin let atom = E.fresh () in
+            Printf.printf "Atom @ (%d, %d): %d\n" x y @@ E.to_int atom;
+            Some atom
+          end
           | Filled i -> None
       )
     ) in
@@ -58,7 +61,11 @@ let solve board =
   in
   let span = span board in
   let span_all = span_all board in
-  let assume x = Sat.assume solver (F.make_cnf x) () in
+  let assume x = Sat.assume solver x () in
+  let fassume x = x
+    |> F.make_cnf
+    |> assume
+  in
   let assert_n n terms = (* assert n lights *)
     let l = List.length terms in
     let negate_excpt_n terms i =
@@ -71,19 +78,18 @@ let solve board =
       )
     in
     Printf.printf "N: %d\n" n;
-    match n with
-      | 0 -> begin
-        terms
-        |> List.map F.make_not
-        |> F.make_and
-      end
-      | n when n = l -> F.make_and terms
-      | n -> terms
-        (* Try negating all but n of the terms *)
-        |> List.mapi (fun i _ -> negate_excpt_n terms i)
-        |> List.map F.make_and
-        |> F.make_or
-  
+      match n with
+        | 0 -> begin
+          terms
+          |> List.map F.make_not
+          |> F.make_and
+        end
+        | n when n = l -> F.make_and terms
+        | n -> terms
+          (* Try negating all but n of the terms *)
+          |> List.mapi (fun i _ -> negate_excpt_n terms i)
+          |> List.map F.make_and
+          |> F.make_or
   in
     (* Assert neighbors of filled blocks *)
     board |>
@@ -98,7 +104,7 @@ let solve board =
                 |> List.map Option.get
                 |> List.map F.make_atom
                 |> assert_n i
-                |> assume
+                |> fassume
             end
             | Light
             | Shined
@@ -118,8 +124,7 @@ let solve board =
               span_all x y
               |> List.map (fun (x, y) -> name x y)
               |> List.map Option.get (* should all be non-none *)
-              |> List.map F.make_atom
-              |> F.make_or
+              |> (fun x -> [x])
               |> assume
           end
           | Filled i -> ()
@@ -147,7 +152,7 @@ let solve board =
                 |> List.map Option.get (* should all be non-none *)
                 |> List.map F.make_atom
                 |> assert_max_one
-                |> assume
+                |> fassume
             with
             | _ -> ()
           end
@@ -161,7 +166,15 @@ let solve board =
   assert_lit (0, 1);
   let result = Sat.solve solver in
   match result with
-  | Unsat _ -> None
+  | Unsat state ->
+    let fmt = Format.formatter_of_out_channel stdout in
+    Format.fprintf fmt "Failed at clause %a@?\n" Sat.Clause.pp (state.Msat.unsat_conflict ());
+    state.Msat.get_proof ()
+      |> Sat.Proof.unsat_core
+      |> List.iter (fun x -> Format.fprintf fmt "Core Clause: %a@?\n" Sat.Clause.pp x);
+    state.Msat.unsat_assumptions ()
+      |> List.iter (fun x -> Format.fprintf fmt "Atom: %a@?\n" Sat.Atom.pp x);
+    None
   | Sat state -> begin
     Some (
       board |>
