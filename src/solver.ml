@@ -137,7 +137,7 @@ let solve board =
             (* Cell was filled, now check opposite dir *)
             (* Helper function asserting a list of terms has at most 1 one *)
             let assert_max_one terms =
-              [2; 1; 0]
+              [1; 0]
               |> List.map (fun x -> assert_n x terms)
               |> F.make_or
             in

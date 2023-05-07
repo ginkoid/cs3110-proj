@@ -48,9 +48,9 @@ let click board x y =
       Array.mapi (fun x' cell ->
           if x' = x && y' = y then
             match cell with
+            | Shined
             | Empty -> Light
             | Light -> Empty
-            | Shined -> print_endline "shined"; Light
             | x -> x
           else cell))
     board
