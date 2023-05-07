@@ -7,7 +7,7 @@ You'll need:
 
 Run:
 ```sh
-opam install js_of_ocaml js_of_ocaml-ppx js_of_ocaml-lwt zarith_stubs_js bitwuzla
+opam install js_of_ocaml js_of_ocaml-ppx js_of_ocaml-lwt mc2
 npm install
 make start
 ```

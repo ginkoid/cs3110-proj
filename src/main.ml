@@ -6,9 +6,10 @@ let cell_shined board x y =
     then false
     else
       match board.(y').(x') with
+      | Shined
       | Empty -> check (x' + dx) (y' + dy) (dx, dy)
       | Light -> true
-      | _ -> false
+      | Filled _ -> false
   in
   let checkdir (dx, dy) = check (x + dx) (y + dy) (dx, dy) in
   checkdir (1, 0) || checkdir (-1, 0) || checkdir (0, 1) || checkdir (0, -1)
@@ -49,7 +50,8 @@ let click board x y =
             match cell with
             | Empty -> Light
             | Light -> Empty
-            | a -> a
+            | Shined -> print_endline "shined"; Light
+            | x -> x
           else cell))
     board
 
@@ -82,12 +84,11 @@ let game board =
     status##.className := js (if Solver.solved board'' then "done" else "playing");
     board' := board''
   in
-  let shined_board = shined board in
   let els =
     Array.mapi
       (fun y ->
         Array.mapi (fun x cell ->
-            dom_of_cell update_board shined_board x y))
+            dom_of_cell update_board board x y))
       board
   in
   Array.iter (Dom.appendChild grid) (flat els);
