@@ -1,7 +1,5 @@
 open Common
 
-(* decode creates a board from a puzzle in the pzpr 4-cell format.
-   https://github.com/robx/pzprjs/blob/5d46ce86548bc71589cc9fec1ea5b7b488341023/src/variety-common/Encode.js#L13-L45 *)
 let decode str =
   let parts = String.split_on_char '/' str in
   let width = int_of_string @@ List.nth parts 0 in

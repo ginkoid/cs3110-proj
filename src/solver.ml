@@ -42,7 +42,7 @@ let solve board =
           | Light
           | Shined
           | Empty -> begin let atom = E.fresh () in
-            Printf.printf "Atom @ (%d, %d): %d\n" x y @@ E.to_int atom;
+            (* Printf.printf "Atom @ (%d, %d): %d\n" x y @@ E.to_int atom; *)
             Some atom
           end
           | Filled i -> None
@@ -77,7 +77,7 @@ let solve board =
         else F.make_not t
       )
     in
-    Printf.printf "N: %d\n" n;
+    (* Printf.printf "N: %d\n" n; *)
       match n with
         | 0 -> begin
           terms
@@ -97,7 +97,7 @@ let solve board =
         Array.iteri (fun y ->
           function
             | Filled i -> begin (* sum of neighbors == block number *)
-              Printf.printf "Block %d at %d %d\n" i x y;
+              (* Printf.printf "Block %d at %d %d\n" i x y; *)
               neighbors x y
                 |> List.map (fun (x, y) -> name x y)
                 |> List.filter Option.is_some
@@ -119,7 +119,7 @@ let solve board =
           | Light
           | Shined
           | Empty -> begin
-            Printf.printf "Span_all %d %d len %d\n" x y (List.length @@ span_all x y);
+            (* Printf.printf "Span_all %d %d len %d\n" x y (List.length @@ span_all x y); *)
             (* Checks that every cell is lit by at least one light *)
               span_all x y
               |> List.map (fun (x, y) -> name x y)
@@ -138,7 +138,7 @@ let solve board =
           (* Check cell in the opposite dir of me *)
           match cell (x-dx) (y-dy) with
           | Filled _ -> begin
-            Printf.printf "Starting from %d %d in %d %d dist %d\n" x y dx dy @@ List.length (span x y [(dx, dy)]);
+            (* Printf.printf "Starting from %d %d in %d %d dist %d\n" x y dx dy @@ List.length (span x y [(dx, dy)]); *)
             (* Cell was filled, now check opposite dir *)
             (* Helper function asserting a list of terms has at most 1 one *)
             let assert_max_one terms =
@@ -167,13 +167,13 @@ let solve board =
   let result = Sat.solve solver in
   match result with
   | Unsat state ->
-    let fmt = Format.formatter_of_out_channel stdout in
-    Format.fprintf fmt "Failed at clause %a@?\n" Sat.Clause.pp (state.Msat.unsat_conflict ());
-    state.Msat.get_proof ()
+    (* let fmt = Format.formatter_of_out_channel stdout in *)
+    (* Format.fprintf fmt "Failed at clause %a@?\n" Sat.Clause.pp (state.Msat.unsat_conflict ()); *)
+    (* state.Msat.get_proof ()
       |> Sat.Proof.unsat_core
       |> List.iter (fun x -> Format.fprintf fmt "Core Clause: %a@?\n" Sat.Clause.pp x);
     state.Msat.unsat_assumptions ()
-      |> List.iter (fun x -> Format.fprintf fmt "Atom: %a@?\n" Sat.Atom.pp x);
+      |> List.iter (fun x -> Format.fprintf fmt "Atom: %a@?\n" Sat.Atom.pp x); *)
     None
   | Sat state -> begin
     Some (
