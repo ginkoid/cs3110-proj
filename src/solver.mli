@@ -1,3 +1,4 @@
+open Common
 open Util
 (* Return a solved version of the board if it exists *)
 val solve: board -> board option

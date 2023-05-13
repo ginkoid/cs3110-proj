@@ -1,4 +1,4 @@
-open Util
+open Common
 module Sat = Msat_sat
 module E = Sat.Int_lit
 module F = Msat_tseitin.Make(E)
@@ -7,7 +7,7 @@ module F = Msat_tseitin.Make(E)
 let access board x y =
   let xn, yn = size board in
   match x, y with
-  | x, y when 
+  | x, y when
   (0 <= x && x < xn)
   && (0 <= y && y < yn)
     -> Some (x, y)
@@ -32,12 +32,12 @@ let span board x y dirs =
 
 let span_all board x y = span board x y [(0, 1); (0, -1); (-1, 0); (1, 0)]
 
-let solve board = 
+let solve board =
   (* Solver *)
   let solver = Sat.create () in
   let names = board |>
     Array.mapi (fun x ->
-      Array.mapi (fun y -> 
+      Array.mapi (fun y ->
         function
           | Light
           | Shined
@@ -50,7 +50,7 @@ let solve board =
     ) in
   (* Helper utilities *)
   let cell = cell board in
-  let name x y = 
+  let name x y =
     access board x y
     |> Option.map (fun (x, y) -> names.(x).(y))
     |> Option.join
@@ -72,7 +72,7 @@ let solve board =
       terms
       |> List.mapi (fun j t ->
         if (0 <= (j-i) && (j-i) < n)
-          || (0 <= (j+l-i) && (j+l-i) < n) then 
+          || (0 <= (j+l-i) && (j+l-i) < n) then
             t
         else F.make_not t
       )
@@ -94,7 +94,7 @@ let solve board =
     (* Assert neighbors of filled blocks *)
     board |>
       Array.iteri (fun x ->
-        Array.iteri (fun y -> 
+        Array.iteri (fun y ->
           function
             | Filled i -> begin (* sum of neighbors == block number *)
               Printf.printf "Block %d at %d %d\n" i x y;
@@ -183,9 +183,9 @@ let solve board =
             function
               | Light
               | Shined
-              | Empty -> 
+              | Empty ->
                 begin
-                  if 
+                  if
                     name x y
                       |> Option.get
                       |> state.Msat.eval
@@ -197,28 +197,34 @@ let solve board =
         )
     )
   end
-    
 
 (* check if board is filled *)
-  let solved board = board
-    |> Array.mapi (fun x ->
-      Array.mapi (fun y ->
-        function 
-        | Light
-        | Shined
-        | Empty -> begin
-          span_all board x y
-          |> List.map (fun (x, y) ->
-            match cell board x y with
-            | Light -> true
-            | Shined
-            | Empty -> false
-            | Filled _ -> failwith "cannot span a filled cell"
-          )
-          |> List.fold_left (&&) true
-        end
-        | Filled _ -> true
-      )
-    )
-    |> Array.map (Array.fold_left (&&) true)
-    |> Array.fold_left (&&) true
+  let solved board =
+    Array.fold_left
+      (fun acc (y, row) ->
+        acc
+        && Array.fold_left
+             (fun acc (x, cell) ->
+               acc
+               &&
+               match cell with
+               | Shined | Empty -> cell_shined board x y
+               | Light -> not (cell_shined board x y)
+               | Filled n ->
+                   let check (dx, dy) =
+                     let x' = x + dx in
+                     let y' = y + dy in
+                     if
+                       x' < 0 || y' < 0
+                       || x' >= Array.length board
+                       || y' >= Array.length board
+                     then 0
+                     else
+                       match board.(y').(x') with
+                       | Light -> 1
+                       | _ -> 0
+                   in
+                   check (1, 0) + check (-1, 0) + check (0, 1) + check (0, -1)
+                   == n)
+             true (enumerate row))
+      true (enumerate board)

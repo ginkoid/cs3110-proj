@@ -7,7 +7,7 @@ You'll need:
 
 Run:
 ```sh
-opam install js_of_ocaml js_of_ocaml-ppx js_of_ocaml-lwt mc2
+opam install js_of_ocaml js_of_ocaml-ppx js_of_ocaml-lwt msat
 npm install
 make start
 ```

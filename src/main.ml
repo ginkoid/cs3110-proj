@@ -1,19 +1,5 @@
+open Common
 open Util
-
-let cell_shined board x y =
-  let rec check x' y' (dx, dy) =
-    if x' < 0 || y' < 0 || x' >= Array.length board || y' >= Array.length board
-    then false
-    else
-      match board.(y').(x') with
-      | Shined
-      | Empty -> check (x' + dx) (y' + dy) (dx, dy)
-      | Light -> true
-      | Filled _ -> false
-  in
-  let checkdir (dx, dy) = check (x + dx) (y + dy) (dx, dy) in
-  checkdir (1, 0) || checkdir (-1, 0) || checkdir (0, 1) || checkdir (0, -1)
-
 let shined (board : board) =
   board
   |> Array.mapi (fun y ->
@@ -22,6 +8,8 @@ let shined (board : board) =
              | Shined | Empty -> if cell_shined board x y then Shined else Empty
              | Light -> Light
              | Filled n -> Filled n))
+
+let indices a = Array.mapi (fun i a -> (i, a)) a
 
 let dom_of_cell cb board x y =
   let el =
@@ -48,8 +36,7 @@ let click board x y =
       Array.mapi (fun x' cell ->
           if x' = x && y' = y then
             match cell with
-            | Shined
-            | Empty -> Light
+            | Shined | Empty -> Light
             | Light -> Empty
             | x -> x
           else cell))
@@ -81,14 +68,13 @@ let game board =
         ())
       (enumerate (flat (shined !board')))
       (flat shined_board'');
-    status##.className := js (if Solver.solved board'' then "done" else "playing");
+    status##.className :=
+      js (if Solver.solved board'' then "done" else "playing");
     board' := board''
   in
   let els =
     Array.mapi
-      (fun y ->
-        Array.mapi (fun x cell ->
-            dom_of_cell update_board board x y))
+      (fun y -> Array.mapi (fun x cell -> dom_of_cell update_board board x y))
       board
   in
   Array.iter (Dom.appendChild grid) (flat els);

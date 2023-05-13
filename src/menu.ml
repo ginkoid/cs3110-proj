@@ -1,3 +1,4 @@
+open Common
 open Util
 
 type style = { color : int }
@@ -63,7 +64,7 @@ let menu =
   set_theme 0;
   let puzzle_creator = div "new-puzzle" in
   puzzle_creator##.innerText := js "New Puzzle";
-  puzzle_creator##.onclick := Html.handler (fun _ -> 
+  puzzle_creator##.onclick := Html.handler (fun _ ->
     let selector = Js.Opt.get (
       Html.document##querySelector (js ".select")
     ) (fun () -> assert false) in

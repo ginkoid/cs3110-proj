@@ -1,136 +1,13 @@
+open Common
 open Util
-
-let puzzles =
-  [|
-    [|
-      [|
-        Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty; Empty;
-      |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-      [|
-        Empty;
-        Empty;
-        Filled 4;
-        Empty;
-        Empty;
-        Empty;
-        Filled 1;
-        Empty;
-        Empty;
-        Empty;
-      |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-      [|
-        Filled 1;
-        Empty;
-        Empty;
-        Empty;
-        Empty;
-        Empty;
-        Empty;
-        Filled 3;
-        Empty;
-        Empty;
-      |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-      [|
-        Empty;
-        Empty;
-        Empty;
-        Empty;
-        Filled 2;
-        Empty;
-        Empty;
-        Empty;
-        Filled 1;
-        Empty;
-      |];
-      [|
-        Empty; Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty;
-      |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-    |];
-    [|
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-      [|
-        Empty;
-        Empty;
-        Filled 0;
-        Empty;
-        Empty;
-        Filled 3;
-        Empty;
-        Empty;
-        Empty;
-        Empty;
-      |];
-      [|
-        Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Filled 3; Empty;
-      |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-      [|
-        Empty; Filled 0; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty;
-      |];
-      [|
-        Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Filled 2; Empty;
-      |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-      [|
-        Empty; Filled 1; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty;
-      |];
-      [|
-        Empty;
-        Empty;
-        Empty;
-        Empty;
-        Filled 1;
-        Empty;
-        Empty;
-        Filled 2;
-        Empty;
-        Empty;
-      |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-    |];
-    [|
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-      [|
-        Empty; Empty; Empty; Empty; Empty; Empty; Empty; Filled 4; Empty; Empty;
-      |];
-      [|
-        Empty; Empty; Empty; Empty; Filled 2; Empty; Empty; Empty; Empty; Empty;
-      |];
-      [|
-        Empty; Filled 2; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty;
-      |];
-      [|
-        Empty; Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty;
-      |];
-      [|
-        Empty; Empty; Empty; Filled 1; Empty; Empty; Empty; Empty; Empty; Empty;
-      |];
-      [|
-        Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Filled 0; Empty;
-      |];
-      [|
-        Empty; Empty; Empty; Empty; Empty; Filled 2; Empty; Empty; Empty; Empty;
-      |];
-      [|
-        Empty; Empty; Filled 1; Empty; Empty; Empty; Empty; Empty; Empty; Empty;
-      |];
-      [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
-    |];
-  |]
-
 
 let select, set_current_game, current_game =
   let curr_game = ref None in
-  (fun _ -> 
+  (fun _ ->
     curr_game := None;
     let root = div "select" in
-    let opts = div "opts" in 
-    let selects = Array.mapi (fun i puzzle ->
+    let opts = div "opts" in
+    let selects = List.mapi (fun i puzzle ->
       let el = div "puzzle" ?innertext:(Some ("Puzzle " ^ (string_of_int (i + 1)))) in
       el##.onclick := Html.handler (fun _ ->
         curr_game := Some puzzle;
@@ -138,13 +15,13 @@ let select, set_current_game, current_game =
         Js._true
       );
       el
-    ) puzzles in
+    ) Puzzles.puzzles in
     Dom.appendChild root opts;
-    Array.iter (Dom.appendChild opts) selects;
+    List.iter (Dom.appendChild opts) selects;
     root
-  ), (fun board -> 
+  ), (fun board ->
     let root = div "select" in
     Dom.appendChild root (Main.game board);
-    root 
+    root
   ),
   (fun _ -> !curr_game)
