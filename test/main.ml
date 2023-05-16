@@ -23,6 +23,30 @@ open Akari.Puzzles
 open OUnit2
 open Yojson.Basic.Util
 
+let test_board =
+  [|
+    [|
+      Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty; Empty;
+    |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+    [|
+      Empty; Empty; Filled 4; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty;
+    |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+    [|
+      Filled 1; Empty; Empty; Empty; Empty; Empty; Empty; Filled 3; Empty; Empty;
+    |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+    [|
+      Empty; Empty; Empty; Empty; Filled 2; Empty; Empty; Empty; Filled 1; Empty;
+    |];
+    [|
+      Empty; Empty; Empty; Empty; Empty; Empty; Filled 1; Empty; Empty; Empty;
+    |];
+    [| Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty; Empty |];
+  |]
+
 let test_puzzles =
   [
     "10/10/kbtegbzgbjdtcgbkbq";
@@ -40,6 +64,25 @@ let test_puzzles =
     "11/11/gbgaazhbi2bwcw2bibzhbbgb";
     "4/4/jaiai";
     "9/9/pagajagazhasaao";
+  ]
+
+let test_sizes =
+  [
+    (10, 10);
+    (3, 3);
+    (10, 10);
+    (10, 10);
+    (10, 10);
+    (10, 10);
+    (10, 10);
+    (10, 10);
+    (12, 12);
+    (10, 10);
+    (6, 6);
+    (12, 12);
+    (11, 11);
+    (4, 4);
+    (9, 9);
   ]
 
 let board_of_json j =
@@ -62,7 +105,6 @@ let boards_of_file path =
 
 let init_boards = boards_of_file "test/init_boards.json"
 let solved_boards = boards_of_file "test/solved_boards.json"
-let cell_shined_boards = boards_of_file "test/cell_shined_boards.json"
 
 let decode_tests =
   List.map2
@@ -85,9 +127,54 @@ let solved_tests =
          "board " ^ string_of_int i >:: fun _ ->
          assert_bool "solved" (solved board))
 
-let unlit_board = List.nth cell_shined_boards 0
-let corner_lit_board = List.nth cell_shined_boards 1
-let edge_lit_board = List.nth cell_shined_boards 2
+let size_tests =
+  List.map2
+    (fun (w, h) board ->
+      "size " ^ string_of_int w ^ "x" ^ string_of_int h >:: fun _ ->
+      assert_equal (size board) (w, h))
+    test_sizes init_boards
+
+let unlit_board =
+  [|
+    [| Empty; Empty; Empty |];
+    [| Empty; Filled 0; Empty |];
+    [| Empty; Empty; Empty |];
+  |]
+
+let corner_lit_board =
+  [|
+    [| Light; Empty; Empty |];
+    [| Empty; Filled 0; Empty |];
+    [| Empty; Empty; Empty |];
+  |]
+
+let edge_lit_board =
+  [|
+    [| Empty; Empty; Empty |];
+    [| Empty; Filled 0; Light |];
+    [| Empty; Empty; Empty |];
+  |]
+
+let double_corner_lit_board =
+  [|
+    [| Light; Empty; Empty |];
+    [| Empty; Filled 0; Empty |];
+    [| Empty; Empty; Light |];
+  |]
+
+let double_horiz_edge_lit_board =
+  [|
+    [| Empty; Empty; Empty |];
+    [| Light; Filled 0; Light |];
+    [| Empty; Empty; Empty |];
+  |]
+
+let double_vert_edge_lit_board =
+  [|
+    [| Empty; Light; Empty |];
+    [| Empty; Filled 0; Empty |];
+    [| Empty; Light; Empty |];
+  |]
 
 let cell_shined_tests =
   [
@@ -102,12 +189,43 @@ let cell_shined_tests =
       assert_equal (cell_shined edge_lit_board 2 2) true );
     ( "edge edge" >:: fun _ ->
       assert_equal (cell_shined edge_lit_board 1 0) false );
+    ( "double corner corner 1" >:: fun _ ->
+      assert_equal (cell_shined double_corner_lit_board 0 0) false );
+    ( "double corner corner 2" >:: fun _ ->
+      assert_equal (cell_shined double_corner_lit_board 2 2) false );
+    ( "double corner corner 3" >:: fun _ ->
+      assert_equal (cell_shined double_corner_lit_board 2 0) true );
+    ( "double corner corner 4" >:: fun _ ->
+      assert_equal (cell_shined double_horiz_edge_lit_board 0 2) true );
+    ( "double horiz edge corner 1" >:: fun _ ->
+      assert_equal (cell_shined double_horiz_edge_lit_board 0 0) true );
+    ( "double horiz edge corner 2" >:: fun _ ->
+      assert_equal (cell_shined double_horiz_edge_lit_board 2 2) true );
+    ( "double horiz edge corner 3" >:: fun _ ->
+      assert_equal (cell_shined double_horiz_edge_lit_board 2 0) true );
+    ( "double horiz edge corner 4" >:: fun _ ->
+      assert_equal (cell_shined double_horiz_edge_lit_board 0 2) true );
+    ( "double vert edge corner 1" >:: fun _ ->
+      assert_equal (cell_shined double_vert_edge_lit_board 0 0) true );
+    ( "double vert edge corner 2" >:: fun _ ->
+      assert_equal (cell_shined double_vert_edge_lit_board 2 2) true );
+    ( "double vert edge corner 3" >:: fun _ ->
+      assert_equal (cell_shined double_vert_edge_lit_board 2 0) true );
+    ( "double vert edge corner 4" >:: fun _ ->
+      assert_equal (cell_shined double_vert_edge_lit_board 0 2) true );
+    ( "test board 0 0" >:: fun _ ->
+      assert_equal (cell_shined test_board 0 0) false );
+    ( "test board 9 9" >:: fun _ ->
+      assert_equal (cell_shined test_board 9 9) false );
+    ( "test board 4 4" >:: fun _ ->
+      assert_equal (cell_shined test_board 4 4) false );
   ]
 
 let common_tests =
   [
     ("size 1" >:: fun _ -> assert_equal (size [| [| Empty |] |]) (1, 1));
     ("size 3" >:: fun _ -> assert_equal (size unlit_board) (3, 3));
+    ("size 3" >:: fun _ -> assert_equal (size test_board) (10, 10));
     ( "size 3, 1" >:: fun _ ->
       assert_equal (size [| [| Empty; Empty; Filled 1 |] |]) (3, 1) );
     ( "size 1, 3" >:: fun _ ->
@@ -118,6 +236,150 @@ let common_tests =
       assert_equal (enumerate [| 1; 2 |]) [| (0, 1); (1, 2) |] );
     ( "enumerate string" >:: fun _ ->
       assert_equal (enumerate [| "a"; "b" |]) [| (0, "a"); (1, "b") |] );
+    ( "enumerate board" >:: fun _ ->
+      assert_equal (enumerate test_board)
+        [|
+          ( 0,
+            [|
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Filled 1;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+            |] );
+          ( 1,
+            [|
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+            |] );
+          ( 2,
+            [|
+              Empty;
+              Empty;
+              Filled 4;
+              Empty;
+              Empty;
+              Empty;
+              Filled 1;
+              Empty;
+              Empty;
+              Empty;
+            |] );
+          ( 3,
+            [|
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+            |] );
+          ( 4,
+            [|
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+            |] );
+          ( 5,
+            [|
+              Filled 1;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Filled 3;
+              Empty;
+              Empty;
+            |] );
+          ( 6,
+            [|
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+            |] );
+          ( 7,
+            [|
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Filled 2;
+              Empty;
+              Empty;
+              Empty;
+              Filled 1;
+              Empty;
+            |] );
+          ( 8,
+            [|
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Filled 1;
+              Empty;
+              Empty;
+              Empty;
+            |] );
+          ( 9,
+            [|
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+              Empty;
+            |] );
+        |] );
+    ( "hex_of_int 000000" >:: fun _ ->
+      assert_equal (hex_of_int 0x000000) "#000000" );
+    ( "hex_of_int ff0000" >:: fun _ ->
+      assert_equal (hex_of_int 0xffffff) "#ffffff" );
+    ( "hex_of_int 00ff00" >:: fun _ ->
+      assert_equal (hex_of_int 0x00ff00) "#00ff00" );
+    ( "hex_of_int 0000ff" >:: fun _ ->
+      assert_equal (hex_of_int 0x0000ff) "#0000ff" );
+    ( "hex_of_int ffffff" >:: fun _ ->
+      assert_equal (hex_of_int 0xffffff) "#ffffff" );
   ]
 
 let suite =
@@ -125,6 +387,7 @@ let suite =
     "decode" >::: decode_tests;
     "solve" >::: solve_tests;
     "solved" >::: solved_tests;
+    "size" >::: size_tests;
     "cell_shined" >::: cell_shined_tests;
     "common" >::: common_tests;
   ]

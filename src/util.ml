@@ -11,8 +11,6 @@ let div ?(innertext = "") ?(id = "") className =
   if id <> "" then div##.id := js id else ();
   div
 
-let hex_of_int n = Printf.sprintf "#%06x" n
-
 let set_css root name value =
   ignore
   @@ Js.Unsafe.meth_call root##.style "setProperty"

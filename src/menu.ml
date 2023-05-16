@@ -32,7 +32,17 @@ let theme_dark =
     block = { color = 0xeeeeee };
   }
 
-let themes = [| theme_light; theme_dark |]
+let theme_hotdog =
+  {
+    name = "Hotdog";
+    background = { color = 0xCC2522 };
+    empty = { color = 0x995F4C };
+    shined = { color = 0xC57B27 };
+    light = { color = 0xE8AE02 };
+    block = { color = 0x1E2C2E };
+  }
+
+let themes = [| theme_light; theme_dark; theme_hotdog |]
 let local_storage = Js.Unsafe.pure_js_expr "localStorage"
 let theme_key = "theme"
 

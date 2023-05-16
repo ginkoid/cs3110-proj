@@ -20,8 +20,5 @@ val doc : Html.document Js.t
 val div : ?innertext:string -> ?id:string -> string -> Html.divElement Js.t
 (** div creates HTML div elements *)
 
-val hex_of_int : int -> string
-(** hex_of_int converts an integer into a hex color code *)
-
 val set_css : Html.element Js.t -> string -> string -> unit
 (** set_css sets a css variable on an element *)

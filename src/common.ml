@@ -21,3 +21,5 @@ let cell_shined board x y =
   in
   let checkdir (dx, dy) = check (x + dx) (y + dy) (dx, dy) in
   checkdir (1, 0) || checkdir (-1, 0) || checkdir (0, 1) || checkdir (0, -1)
+
+let hex_of_int n = Printf.sprintf "#%06x" n

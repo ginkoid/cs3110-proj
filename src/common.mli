@@ -18,3 +18,6 @@ val enumerate : 'a array -> (int * 'a) array
 
 val cell_shined : board -> int -> int -> bool
 (** cell_shined returns whether the cell at the given position is shined *)
+
+val hex_of_int : int -> string
+(** hex_of_int converts an integer into a hex color code *)
