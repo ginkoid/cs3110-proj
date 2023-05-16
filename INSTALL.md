@@ -1,13 +1,16 @@
-# Installation
+# Play it online
+
+Visit [akari.pages.dev](https://akari.pages.dev)
+
+# Install locally
 
 You'll need:
 - [Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 - [opam](https://opam.ocaml.org/)
 
-
 Run:
 ```sh
-opam install js_of_ocaml js_of_ocaml-ppx js_of_ocaml-lwt msat
+opam install js_of_ocaml js_of_ocaml-ppx js_of_ocaml-lwt msat yojson
 npm install
 make start
 ```

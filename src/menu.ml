@@ -32,60 +32,81 @@ let theme_dark =
     block = { color = 0xeeeeee };
   }
 
-let themes = [|
-  theme_light;
-  theme_dark;
-|]
+let themes = [| theme_light; theme_dark |]
+let local_storage = Js.Unsafe.pure_js_expr "localStorage"
+let theme_key = "theme"
 
+let save_theme theme_id =
+  ignore
+    (Js.Unsafe.meth_call local_storage "setItem"
+       [|
+         Js.Unsafe.inject (js theme_key);
+         Js.Unsafe.inject (js (string_of_int theme_id));
+       |])
+
+let saved_theme =
+  match
+    Js.Unsafe.meth_call local_storage "getItem"
+      [| Js.Unsafe.inject (js theme_key) |]
+    |> Js.Opt.to_option
+  with
+  | None -> 0
+  | Some it -> int_of_string (Js.to_string it)
 
 let menu =
   let root = div "menu" in
   let toolbar = div "toolbar" in
-  let theme_id = ref 0 in
+  let theme_id = ref saved_theme in
   let theme_updater = div "set-theme" in
   let set_theme_elt name value =
     set_css root ("color-" ^ name) (hex_of_int value.color)
   in
   let set_theme id =
     let theme = themes.(id) in
-    theme_id := id;
     set_theme_elt "background" theme.background;
     set_theme_elt "empty" theme.empty;
     set_theme_elt "shined" theme.shined;
     set_theme_elt "light" theme.light;
     set_theme_elt "block" theme.block;
-    theme_updater##.innerText := js theme.name;
+    theme_updater##.innerText := js theme.name
   in
   theme_updater##.onclick :=
     Html.handler (fun _ ->
-      set_theme @@ (!theme_id + 1) mod (Array.length themes);
-      Js._true
-    );
-  set_theme 0;
+        let theme_id' = (!theme_id + 1) mod Array.length themes in
+        save_theme theme_id';
+        set_theme theme_id';
+        theme_id := theme_id';
+        Js._true);
+  set_theme !theme_id;
   let puzzle_creator = div "new-puzzle" in
   puzzle_creator##.innerText := js "New Puzzle";
-  puzzle_creator##.onclick := Html.handler (fun _ ->
-    let selector = Js.Opt.get (
-      Html.document##querySelector (js ".select")
-    ) (fun () -> assert false) in
-    Dom.replaceChild root (Select.select ()) selector;
-    Js._true
-  );
+  puzzle_creator##.onclick :=
+    Html.handler (fun _ ->
+        let selector =
+          Js.Opt.get
+            (Html.document##querySelector (js ".select"))
+            (fun () -> assert false)
+        in
+        Dom.replaceChild root (Select.select ()) selector;
+        Js._true);
   let give_up = div "give-up" in
   give_up##.innerText := js "Show Solution";
-  give_up##.onclick := Html.handler (fun _ ->
-    let selector = Js.Opt.get (
-      Html.document##querySelector (js ".select")
-    ) (fun () -> assert false) in
-    (match Select.current_game () with
-      | None -> ()
-      | Some board -> begin
-        match Solver.solve board with
-          | None -> failwith "No solution to puzzle"
-          | Some x -> Dom.replaceChild root (Select.set_current_game x) selector
-      end);
-    Js._true
-  );
+  give_up##.onclick :=
+    Html.handler (fun _ ->
+        let selector =
+          Js.Opt.get
+            (Html.document##querySelector (js ".select"))
+            (fun () -> assert false)
+        in
+        (match Select.current_game () with
+        | None -> ()
+        | Some board -> begin
+            match Solver.solve board with
+            | None -> failwith "No solution to puzzle"
+            | Some x ->
+                Dom.replaceChild root (Select.set_current_game x) selector
+          end);
+        Js._true);
   Dom.appendChild toolbar puzzle_creator;
   Dom.appendChild toolbar give_up;
   Dom.appendChild toolbar theme_updater;

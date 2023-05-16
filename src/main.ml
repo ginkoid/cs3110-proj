@@ -1,5 +1,6 @@
 open Common
 open Util
+
 let shined (board : board) =
   board
   |> Array.mapi (fun y ->

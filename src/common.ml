@@ -6,8 +6,7 @@ type cell =
 
 type board = cell array array
 
-let size board = Array.length board.(0), Array.length board
-
+let size board = (Array.length board.(0), Array.length board)
 let enumerate a = Array.mapi (fun i a -> (i, a)) a
 
 let cell_shined board x y =

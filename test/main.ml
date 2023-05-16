@@ -108,9 +108,16 @@ let common_tests =
   [
     ("size 1" >:: fun _ -> assert_equal (size [| [| Empty |] |]) (1, 1));
     ("size 3" >:: fun _ -> assert_equal (size unlit_board) (3, 3));
+    ( "size 3, 1" >:: fun _ ->
+      assert_equal (size [| [| Empty; Empty; Filled 1 |] |]) (3, 1) );
+    ( "size 1, 3" >:: fun _ ->
+      assert_equal (size [| [| Empty |]; [| Filled 1 |]; [| Empty |] |]) (1, 3)
+    );
     ("enumerate 0" >:: fun _ -> assert_equal (enumerate [||]) [||]);
     ( "enumerate 2" >:: fun _ ->
       assert_equal (enumerate [| 1; 2 |]) [| (0, 1); (1, 2) |] );
+    ( "enumerate string" >:: fun _ ->
+      assert_equal (enumerate [| "a"; "b" |]) [| (0, "a"); (1, "b") |] );
   ]
 
 let suite =
